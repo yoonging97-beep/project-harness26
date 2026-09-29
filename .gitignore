@@ -17,3 +17,7 @@ __pycache__/
 dist/
 build/
 *.log
+
+# harness
+harness/node_modules/
+harness/tests/golden/work/

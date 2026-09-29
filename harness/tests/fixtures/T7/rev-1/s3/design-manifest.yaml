@@ -1,0 +1,14 @@
+screens:
+  - id: ingredient-create
+    source: screens/ingredient-create.svg
+    states: [default, ocr-loading, ocr-review, saved]
+tokens:
+  color: [bg, surface, text-primary, primary, on-primary, "#FF0000"]
+  radius: [card, pill]
+  shadow: [shadow-1]
+  spacing: [gutter]
+typography:
+  - { size: 28, line_height: 36, family: Pretendard }
+  - { size: 16, line_height: 26, family: Pretendard }
+pairs:
+  - { text: text-primary, background: surface }

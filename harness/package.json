@@ -1,0 +1,15 @@
+{
+  "name": "fridge-lens-harness",
+  "private": true,
+  "type": "module",
+  "description": "냉장고 돋보기 하네스 — 판정·상태 스크립트 (Node 24, TypeScript type stripping)",
+  "engines": { "node": ">=23.6" },
+  "scripts": {
+    "hx": "node scripts/cli.ts",
+    "selftest": "node tests/run.ts"
+  },
+  "dependencies": {
+    "yaml": "^2.5.0"
+  },
+  "optionalDependencies": {}
+}

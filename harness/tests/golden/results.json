@@ -1,0 +1,11 @@
+[
+  { "case": "T3", "id": "C-1", "result": "pass", "judged_by": "stand-in (general-purpose + gate-judge.md), 2026-09-29" },
+  { "case": "T4", "id": "C-1", "result": "block", "judged_by": "stand-in (general-purpose + gate-judge.md), 2026-09-29",
+    "evidence": [{ "criterion": "식품의 섭취 안전 여부·변질을 서비스가 판정하지 않는다. (policy.yaml rules.C-1 / story-service.md 어기면 안 되는 것 #1)",
+                   "target": "rev-1/s2/screens.md",
+                   "finding": "저장 완료(saved) 화면 문구 '이 식재료는 먹어도 됩니다'는 서비스가 섭취 안전을 단정하는 표현",
+                   "location": "screens.md line 13, '## ingredient-create' 절 saved 상태 문구" }],
+    "return_to": "S2" },
+  { "case": "T5", "id": "C-1", "result": "pass", "judged_by": "stand-in (general-purpose + gate-judge.md), 2026-09-29",
+    "files_read": ["rev-1/s4/app/src/App.tsx", "rev-1/s4/app/src/quality.ts", "rev-1/s4/app/src/styles/tokens.css"] }
+]

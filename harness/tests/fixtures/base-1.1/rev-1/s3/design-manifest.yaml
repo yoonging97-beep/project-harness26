@@ -1,0 +1,16 @@
+screens:
+  - id: ingredient-create
+    source: screens/ingredient-create.svg
+    figma_url: null
+    states: [default, ocr-loading, ocr-review, saved]
+tokens:
+  color: [bg, surface, text-primary, primary, on-primary]
+  radius: [card, pill]
+  shadow: [shadow-1]
+  spacing: [gutter]
+typography:
+  - { size: 28, line_height: 36, family: Pretendard, role: h1 }
+  - { size: 16, line_height: 26, family: Pretendard, role: body-l }
+pairs:
+  - { text: text-primary, background: surface }
+  - { text: on-primary, background: primary }

@@ -1,0 +1,228 @@
+# 하네스 운영 설정 (R4). value/status/origin 메타데이터를 강제하지 않는다 (R4-5).
+# 게이트 조건의 사람용 SSOT는 harness/05-gates.md 이고, 아래 gates.conditions 는 판정 스크립트용 사본이다.
+# 두 곳의 id/severity/method 는 self-test T0 (gates-sync) 로 일치를 검사한다.
+
+documents:
+  baseline:                       # R0 기준 문서
+    prd: Docs/prd.md
+    story_service: Docs/story-service.md
+    design: Docs/design.md
+  config:                         # R8 F5: baseline 에 hash 기록
+    design_tokens: harness/config/design-tokens.yaml
+    policy: harness/config/policy.yaml
+    harness: harness/config/harness.yaml
+  draft:                          # R0: 판정에 쓰지 않음
+    - Docs/gates.md
+    - Docs/default-design.md
+  reference:
+    - Docs/story-work.md
+    - Docs/userflow.md
+    - Docs/assets/moodboard/
+
+paths:
+  requests: harness/requests      # R8 F1
+  runs: harness/runs
+  scripts: harness/scripts
+
+retry:
+  stage: 3
+  total: 6
+  supervised: 1
+
+run:
+  id_prefix: RUN-
+  id_digits: 3
+  active_statuses: [running, paused]
+  terminal_statuses: [completed, aborted]
+  waiting_for: [B0, escalation, final_approval]
+  stages: [S1, S2, S3, S4]
+  stage_gate: { S1: G1, S2: G2, S3: G3, S4: G4 }
+  stage_dir: { S1: s1, S2: s2, S3: s3, S4: s4 }
+
+request:
+  required_frontmatter: [feature_id, requested_at]
+  required_sections: [배경, 요구사항, 제약, 범위 밖]
+  forbidden_frontmatter: [run_id]
+
+checkpoint_ignore:
+  - node_modules/
+  - dist/
+  - build/
+  - .vite/
+  - coverage/
+  - playwright-report/
+  - test-results/
+  - .DS_Store
+  - "*.log"
+
+# R6-6: 최종 승인은 명시적 의도만. 승인 표현이 있고, 거부·보류 표현이 없어야 한다.
+approval:
+  explicit_patterns: ["최종 승인합니다", "최종 승인할게", "최종 승인해", "최종승인합니다", "final approval", "최종 승인 확정"]
+  negations: ["안 ", "않", "보류", "아직", "말고", "취소", "반려"]
+
+# 판정 스크립트 허용 목록 (R6-4)
+allowed_scripts:
+  - harness/scripts/cli.ts
+  - harness/tests/run.ts
+
+# targets 약어 (R5 1장)
+targets:
+  req: s1/requirements.md
+  q: s1/questions.md
+  ans: s1/answers.md
+  spec: s2/spec.md
+  scr: s2/screens.md
+  man: s3/design-manifest.yaml
+  img: s3/screens/
+  rev: s3/review.md
+  app: s4/app/
+  qa: s4/qa.md
+
+criteria:
+  prd: Docs/prd.md
+  svc: Docs/story-service.md
+  dsn: Docs/design.md
+  tok: harness/config/design-tokens.yaml
+  pol: harness/config/policy.yaml
+  hns: harness/config/harness.yaml
+
+# screens.md 의 kind 로 G2-10(빈 화면)·G2-15(참고 안내) 대상 화면을 정한다.
+screen_kinds:
+  allowed: [dashboard, list, form, detail, analysis, guide, settings, layout]
+  empty_state_required: [list, analysis]
+  disclaimer_required: [guide, analysis]
+
+# G4 정적 검사 대상 (s4/app/)
+app_scan:
+  extensions: [.ts, .tsx, .js, .jsx, .css, .html]
+  exclude: ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx", "__tests__/", "tests/", "package-lock.json"]
+  tokens_file: src/styles/tokens.css        # 토큰 CSS 변수를 정의하는 유일한 파일 (G4-5 예외)
+  hardcoded_patterns:                       # G4-5
+    - '#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?(?:[0-9a-fA-F]{2})?\b'
+    - '\brgba?\('
+    - '\bhsla?\('
+    - 'border-radius:\s*\d'
+    - 'font-size:\s*\d'
+    - 'box-shadow:\s*(?!var\()[^;]*\d'
+    - '\bborderRadius:\s*\d'
+    - '\bfontSize:\s*\d'
+  infinite_patterns: ['\binfinite\b', 'repeat:\s*Infinity']   # G4-12
+  motion_line_pattern: '(transition|animation|duration)'      # G4-11 대상 줄
+  motion_ignore_below_ms: 1                                   # reduced-motion 용 0.01ms 등은 "없음"으로 본다
+
+# G4 테스트 증거 태그 (테스트 이름에 포함)
+test_tags:
+  acceptance: "[{id}]"          # 예: [AC-1.1]
+  g2_condition: "[{id}]"        # 예: [G2-11]
+  midnight: "[midnight]"
+  daily_alert: "[daily-alert]"
+behavioral_g2: [G2-5, G2-6, G2-7, G2-8, G2-10, G2-11, G2-12, G2-13, G2-14, G2-15, G2-16]
+
+schema:
+  G1: [SC-1, SC-2]
+  G2: [SC-3, SC-4]
+  G3: [SC-4, SC-5]
+  G4: [SC-3, SC-5]
+
+gates:
+  applies_to_mapping: { status: provisional, origin: claude-default }   # R5 9장, P-2
+  conditions:
+    # ── 공통 ─────────────────────────────────────────────
+    - { id: C-1, gates: [G2, G3, G4], severity: BLOCK, method: llm-judge, prefilter: C-1, applies_to: all, criteria: [svc, pol],
+        targets: { G2: [spec, scr], G3: [man, img, rev], G4: [app] },
+        question: "서비스가 사용자에게 식품의 섭취 안전 여부나 변질을 판정·단정하는가? 참고 안내·제품 표시 확인 권유는 위반이 아니다." }
+    - { id: C-2a, gates: [G2, G3, G4], severity: BLOCK, method: llm-judge, prefilter: C-2, applies_to: all, criteria: [svc, pol],
+        targets: { G2: [spec, scr], G3: [img], G4: [app] },
+        question: "외부 쇼핑몰 주문이나 결제를 자동으로 실행하는 기능·흐름·버튼이 있는가? '정기 구매' 일정 알림은 위반이 아니다." }
+    - { id: C-2b, gates: [G4], severity: BLOCK, method: script, check: external_domains, applies_to: all, criteria: [pol], targets: { G4: [app] } }
+    - { id: C-3, gates: [G2, G3, G4], severity: BLOCK, method: llm-judge, prefilter: C-3, applies_to: all, criteria: [svc],
+        targets: { G2: [spec, scr], G3: [img], G4: [app] },
+        question: "공유 냉장고 기능(구성원 초대, 권한, 타인 데이터 접근)이 실제로 설계·구현되어 있는가?" }
+    - { id: P-1, gates: [G3, G4], severity: BLOCK, method: script, check: provisional_reported, applies_to: all, criteria: [tok, pol], targets: { G3: [man], G4: [app] } }
+    - { id: P-2, gates: [G1, G2, G3, G4], severity: BLOCK, method: script, check: na_reported, applies_to: all, criteria: [pol], targets: {} }
+
+    # ── G1 ──────────────────────────────────────────────
+    - { id: G1-1, gates: [G1], severity: BLOCK, method: script, check: req_story_tag, applies_to: all, criteria: [svc], targets: { G1: [req] } }
+    - { id: G1-2, gates: [G1], severity: BLOCK, method: script, check: story_prd_basis, applies_to: all, criteria: [prd, svc], targets: { G1: [req] } }
+    - { id: G1-3, gates: [G1], severity: BLOCK, method: script, check: req_source, applies_to: all, criteria: [prd, pol], targets: { G1: [req] } }
+    - { id: G1-4, gates: [G1], severity: BLOCK, method: llm-judge, applies_to: all, criteria: [prd], targets: { G1: [req, q] },
+        question: "기존 PRD 정책과 충돌하는 요구사항이 있는데 질문 목록에 올라가 있지 않은가?" }
+    - { id: G1-5, gates: [G1], severity: WARN, method: llm-judge, applies_to: all, criteria: [prd, svc], targets: { G1: [req, ans] },
+        question: "PRD와 다른 사용자 결정이 요구사항에 기록 없이 반영되었는가?" }
+    - { id: G1-6, gates: [G1], severity: BLOCK, method: script, check: questions_answered, applies_to: all, criteria: [], targets: { G1: [q, ans] } }
+
+    # ── G2 ──────────────────────────────────────────────
+    - { id: G2-1, gates: [G2], severity: BLOCK, method: script, check: features_have_screens, applies_to: all, criteria: [prd], targets: { G2: [spec, scr] } }
+    - { id: G2-2, gates: [G2], severity: BLOCK, method: script, check: screens_have_features, applies_to: all, criteria: [prd], targets: { G2: [scr] } }
+    - { id: G2-3, gates: [G2], severity: BLOCK, method: script, check: feature_prd_screens, applies_to: all, criteria: [prd, pol], targets: { G2: [scr] } }
+    - { id: G2-4, gates: [G2], severity: BLOCK, method: llm-judge, applies_to: ["2.1"], criteria: [prd, dsn], targets: { G2: [scr] },
+        question: "홈 대시보드 첫 뷰포트에서 임박 식재료가 바로 보이지 않는가?" }
+    - { id: G2-5, gates: [G2], severity: BLOCK, method: script, check: item_states_defined, applies_to: ["1.2", "2.1"], criteria: [pol], targets: { G2: [scr] } }
+    - { id: G2-6, gates: [G2], severity: BLOCK, method: script, check: imminent_days_match, applies_to: ["1.2", "2.1"], criteria: [pol], targets: { G2: [spec] } }
+    - { id: G2-7, gates: [G2], severity: BLOCK, method: llm-judge, applies_to: ["1.2"], criteria: [prd], targets: { G2: [spec, scr] },
+        question: "소비 완료·폐기 처리를 보관 중으로 되돌리는 흐름이 빠져 있는가?" }
+    - { id: G2-8, gates: [G2], severity: BLOCK, method: llm-judge, applies_to: ["1.2", "4.1"], criteria: [svc], targets: { G2: [spec, scr] },
+        question: "폐기 처리 시 폐기 사유를 입력하는 흐름이 빠져 있는가?" }
+    - { id: G2-9, gates: [G2], severity: BLOCK, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G2: [scr] },
+        question: "선택·완료·비활성 상태 정의가 빠진 인터랙티브 컴포넌트가 있는가?" }
+    - { id: G2-10, gates: [G2], severity: BLOCK, method: script, check: empty_states_defined, applies_to: ["1.2", "4.1", "4.2"], criteria: [prd], targets: { G2: [scr] } }
+    - { id: G2-11, gates: [G2], severity: BLOCK, method: llm-judge, applies_to: ["1.1"], criteria: [prd], targets: { G2: [spec, scr] },
+        question: "OCR로 추출한 값을 저장 전에 사용자가 확인·수정하는 단계가 빠져 있는가?" }
+    - { id: G2-12, gates: [G2], severity: BLOCK, method: llm-judge, applies_to: ["1.3"], criteria: [prd], targets: { G2: [spec, scr] },
+        question: "보관 방법을 찾을 수 없는 식재료에 일반 안내를 표시하는 분기가 빠져 있는가?" }
+    - { id: G2-13, gates: [G2], severity: BLOCK, method: llm-judge, applies_to: ["2.1"], criteria: [prd], targets: { G2: [spec] },
+        question: "소비기한이 없는 식재료를 알림 대상에서 제외하는 조건이 빠져 있는가?" }
+    - { id: G2-14, gates: [G2], severity: BLOCK, method: llm-judge, applies_to: ["4.1"], criteria: [prd], targets: { G2: [spec] },
+        question: "가격이 없는 식재료를 금액 집계에서 제외하는 조건이 빠져 있는가?" }
+    - { id: G2-15, gates: [G2], severity: BLOCK, method: script, check: disclaimer_present, applies_to: ["1.3", "4.2"], criteria: [pol], targets: { G2: [scr] } }
+    - { id: G2-16, gates: [G2], severity: BLOCK, method: llm-judge, applies_to: ["2.1", "2.2"], criteria: [prd], targets: { G2: [spec, scr] },
+        question: "알림 유형별 수신 끄기가 없거나, 끈 유형에도 새 알림을 보내는가?" }
+
+    # ── G3 ──────────────────────────────────────────────
+    - { id: G3-1, gates: [G3], severity: BLOCK, method: script, check: manifest_covers_screens, applies_to: all, criteria: [], targets: { G3: [man] } }
+    - { id: G3-2, gates: [G3], severity: BLOCK, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G3: [man, img] },
+        question: "화면설계서에 없는 기능이나 버튼이 디자인에 추가되었는가?" }
+    - { id: G3-3, gates: [G3], severity: BLOCK, method: script, check: manifest_colors, applies_to: all, criteria: [tok], targets: { G3: [man] } }
+    - { id: G3-4, gates: [G3], severity: BLOCK, method: llm-judge, applies_to: all, criteria: [dsn, tok], targets: { G3: [man, img] },
+        question: "content 색(옐로우·핑크·퍼플·그린)이 버튼·내비게이션 같은 UI 요소에 쓰였는가?" }
+    - { id: G3-5, gates: [G3], severity: WARN, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G3: [img] },
+        question: "primary 블루가 주요 액션·선택 상태 외 용도에 쓰였는가?" }
+    - { id: G3-6, gates: [G3], severity: BLOCK, method: script, check: manifest_contrast, applies_to: all, criteria: [tok], targets: { G3: [man] } }
+    - { id: G3-7, gates: [G3], severity: BLOCK, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G3: [img] },
+        question: "상태를 색만으로 표현하고 라벨 텍스트·아이콘이 없는 곳이 있는가?" }
+    - { id: G3-8, gates: [G3], severity: WARN, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G3: [img] },
+        question: "강한 그라데이션이 정보 위계나 텍스트 가독성을 방해하는가?" }
+    - { id: G3-9, gates: [G3], severity: BLOCK, method: script, check: manifest_fonts, applies_to: all, criteria: [tok], targets: { G3: [man] } }
+    - { id: G3-10, gates: [G3], severity: BLOCK, method: script, check: manifest_type_scale, applies_to: all, criteria: [tok], targets: { G3: [man] } }
+    - { id: G3-11, gates: [G3], severity: BLOCK, method: script, check: manifest_min_size, applies_to: all, criteria: [tok], targets: { G3: [man] } }
+    - { id: G3-12, gates: [G3], severity: WARN, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G3: [img] },
+        question: "날짜·수량·금액이 이어지는 영역에 Tabular Numbers가 적용되지 않았는가?" }
+    - { id: G3-13, gates: [G3], severity: WARN, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G3: [img] },
+        question: "크기·굵기·여백만으로 정보 위계가 드러나지 않는가?" }
+    - { id: G3-14, gates: [G3], severity: BLOCK, method: script, check: manifest_radius, applies_to: all, criteria: [tok], targets: { G3: [man] } }
+    - { id: G3-15, gates: [G3], severity: BLOCK, method: script, check: manifest_shadow, applies_to: all, criteria: [tok], targets: { G3: [man] } }
+    - { id: G3-16, gates: [G3], severity: WARN, method: script, check: manifest_spacing, applies_to: all, criteria: [tok], targets: { G3: [man] } }
+    - { id: G3-17, gates: [G3], severity: BLOCK, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G3: [man, img] },
+        question: "장식 요소(누끼 이미지, 카드 겹침)가 핵심 정보나 주요 액션을 가리는가?" }
+    - { id: G3-18, gates: [G3], severity: WARN, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G3: [img] },
+        question: "3D·Glass 효과가 선택적이지 않고 대부분의 컴포넌트에 적용되었는가?" }
+    - { id: G3-19, gates: [G3], severity: WARN, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G3: [img] },
+        question: "카드가 단순한 박스의 반복처럼 보이는가?" }
+    - { id: G3-20, gates: [G3], severity: WARN, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G3: [img] },
+        question: "기본 화면이 차분하지 않거나, 시각적 재미가 상호작용이 아닌 곳에 몰려 있는가?" }
+
+    # ── G4 ──────────────────────────────────────────────
+    - { id: G4-1, gates: [G4], severity: BLOCK, method: script, check: acceptance_tests, applies_to: all, criteria: [svc], targets: { G4: [spec, app, qa] } }
+    - { id: G4-2, gates: [G4], severity: BLOCK, method: script, check: g2_condition_tests, applies_to: all, criteria: [], targets: { G4: [app, qa] } }
+    - { id: G4-3, gates: [G4], severity: BLOCK, method: script, check: midnight_tests, applies_to: ["1.2", "2.1"], criteria: [pol], targets: { G4: [app] } }
+    - { id: G4-4, gates: [G4], severity: BLOCK, method: script, check: daily_alert_tests, applies_to: ["2.1"], criteria: [pol], targets: { G4: [app] } }
+    - { id: G4-5, gates: [G4], severity: BLOCK, method: script, check: hardcoded_values, applies_to: all, criteria: [tok], targets: { G4: [app] } }
+    - { id: G4-6, gates: [G4], severity: BLOCK, method: llm-judge, applies_to: all, criteria: [dsn], targets: { G4: [man, app] },
+        question: "구현 화면(gates/evidence 스크린샷)이 확정 UI 디자인과 다른가?" }
+    - { id: G4-7, gates: [G4], severity: BLOCK, method: script, check: axe_contrast, applies_to: all, criteria: [dsn], targets: { G4: [app] } }
+    - { id: G4-8, gates: [G4], severity: BLOCK, method: script, check: no_hscroll_360, applies_to: all, criteria: [tok], targets: { G4: [app] } }
+    - { id: G4-9, gates: [G4], severity: WARN, method: script, check: touch_targets, applies_to: all, criteria: [tok], targets: { G4: [app] } }
+    - { id: G4-10, gates: [G4], severity: WARN, method: script, check: input_font_size, applies_to: all, criteria: [tok], targets: { G4: [app] } }
+    - { id: G4-11, gates: [G4], severity: BLOCK, method: script, check: motion_durations, applies_to: all, criteria: [dsn, tok], targets: { G4: [app] } }
+    - { id: G4-12, gates: [G4], severity: BLOCK, method: script, check: no_infinite_animation, applies_to: all, criteria: [dsn], targets: { G4: [app] } }
+    - { id: G4-13, gates: [G4], severity: BLOCK, method: script, check: reduced_motion, applies_to: all, criteria: [dsn], targets: { G4: [app] } }

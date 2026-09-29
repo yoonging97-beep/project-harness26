@@ -1,0 +1,357 @@
+{
+  "at": "2026-09-29T14:00:11.246Z",
+  "passed": 23,
+  "failed": 0,
+  "config_hashes": {
+    "design_tokens": "sha256:782489956ee72ebc6a218a0875f9cf11d0a35c270fd229c479553c2559e67f59",
+    "policy": "sha256:7dca2b6afe22119d8673a85090cfd58d00be0f77f91a2131965ef61b573afb71",
+    "harness": "sha256:29e8f93203607e476eb5bd16b38fe33f96477f0f92b5eaf4986287fe24f425a7"
+  },
+  "results": [
+    {
+      "id": "T0",
+      "name": "config 규칙 + 05-gates.md ↔ harness.yaml 동기화",
+      "rules": "R4-3, R4-5, R4-6",
+      "ok": true,
+      "detail": {
+        "config": [],
+        "gates": {
+          "md": 61,
+          "yaml": 61,
+          "problems": []
+        }
+      }
+    },
+    {
+      "id": "T0b",
+      "name": "base fixture: G1~G3 script 조건 BLOCK 0",
+      "rules": "기준선",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "id": "T1",
+      "name": "story 없는 요구사항 → G1 block, measure 에 해당 ID",
+      "rules": "G1-1, R5-5",
+      "ok": true,
+      "detail": {
+        "id": "G1-1",
+        "severity": "BLOCK",
+        "method": "script",
+        "result": "block",
+        "measure": {
+          "expected": 0,
+          "actual": 1,
+          "violations": [
+            "REQ-03"
+          ]
+        }
+      }
+    },
+    {
+      "id": "T2",
+      "name": "spec.md 에 F-n 없음 → schema 실패 → G2 block",
+      "rules": "R5-10, R5-11",
+      "ok": true,
+      "detail": {
+        "expected": 0,
+        "actual": 1,
+        "violations": [
+          "SC-3 spec.md: features[0].id 가 F-n 형식이 아님"
+        ]
+      }
+    },
+    {
+      "id": "T3",
+      "name": "참고 안내 속 '상했' → C-1 후보 O, script 만으로 block 아님",
+      "rules": "R5-6",
+      "ok": true,
+      "detail": [
+        {
+          "file": "s2/screens.md",
+          "line": 13,
+          "phrase": "상했",
+          "text": "저장 화면 하단 안내: \"섭취 전 실제 제품 표시와 상태를 우선 확인하세요. 상했는지 여부는 서비스가 판단하지 않습니다.\""
+        }
+      ]
+    },
+    {
+      "id": "T4",
+      "name": "'먹어도 됩니다' → C-1 후보 O + judge block 이면 evidence 필수",
+      "rules": "C-1, R5-4",
+      "ok": true,
+      "detail": {
+        "candidates": [
+          {
+            "file": "s2/screens.md",
+            "line": 13,
+            "phrase": "먹어도 됩니다",
+            "text": "저장 완료(saved) 화면 문구: \"이 식재료는 먹어도 됩니다\""
+          }
+        ],
+        "rejudge": [
+          {
+            "id": "C-1",
+            "reason": "block 인데 evidence(criterion·target·finding) 없음"
+          }
+        ],
+        "final": [
+          "C-1"
+        ]
+      }
+    },
+    {
+      "id": "T5",
+      "name": "코드 변수 isGood → C-1 후보 아님, block 아님",
+      "rules": "R5-6",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "id": "T6",
+      "name": "허용 목록 밖 fetch → C-2b block",
+      "rules": "C-2b",
+      "ok": true,
+      "detail": {
+        "expected": 0,
+        "actual": 1,
+        "violations": [
+          {
+            "file": "src/order.ts",
+            "line": 2,
+            "match": "https://shop.example.com"
+          }
+        ]
+      }
+    },
+    {
+      "id": "T7",
+      "name": "manifest 에 토큰 밖 색 #FF0000 → G3-3 block",
+      "rules": "G3-3",
+      "ok": true,
+      "detail": {
+        "expected": 0,
+        "actual": 1,
+        "violations": [
+          "#FF0000"
+        ]
+      }
+    },
+    {
+      "id": "T8",
+      "name": "provisional 사용 N개인데 WARN N-1개 보고 → P-1 block",
+      "rules": "R5-8",
+      "ok": true,
+      "detail": {
+        "used": 13,
+        "tampered": {
+          "ok": false,
+          "used": 10,
+          "reported": 12,
+          "missing": [
+            "tokens:color.bg"
+          ]
+        }
+      }
+    },
+    {
+      "id": "T9",
+      "name": "1.1 실행의 G2-4 → n/a + reason + P-2 WARN",
+      "rules": "R5-7, R5-9",
+      "ok": true,
+      "detail": {
+        "na": {
+          "id": "G2-4",
+          "severity": "BLOCK",
+          "method": "llm-judge",
+          "result": "n/a",
+          "reason": "feature_id 1.1 not in applies_to",
+          "mapping": "provisional"
+        },
+        "warning": {
+          "type": "na_provisional",
+          "id": "G2-4",
+          "reason": "feature_id 1.1 not in applies_to"
+        },
+        "p2": {
+          "ok": true,
+          "na_provisional": 11,
+          "reported": 11,
+          "missing": [],
+          "no_reason": []
+        }
+      }
+    },
+    {
+      "id": "T10",
+      "name": "scope 밖 Docs/prd.md 수정 → block + 파일 목록, restore 없음",
+      "rules": "R6-1, R7-4",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "changed": 2,
+        "outside": [
+          {
+            "path": "Docs/prd.md",
+            "pre_existing_change": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "T11",
+      "name": "G2 pass 뒤 spec.md 변경 + 파일 추가 → immutable 위반 2건",
+      "rules": "R7-8",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "added": [
+          "s2/extra.md"
+        ],
+        "removed": [],
+        "changed": [
+          "s2/spec.md"
+        ]
+      }
+    },
+    {
+      "id": "T12",
+      "name": "S3 retry 3회 상태에서 BLOCK → escalation",
+      "rules": "R3-5",
+      "ok": true,
+      "detail": {
+        "status": "paused",
+        "waiting_for": "escalation",
+        "retry": {
+          "stage": {
+            "S1": 0,
+            "S2": 0,
+            "S3": 3,
+            "S4": 0
+          },
+          "total": 3
+        }
+      }
+    },
+    {
+      "id": "T13",
+      "name": "전체 retry 6회 상태에서 BLOCK(7회째) → escalation",
+      "rules": "R3-11",
+      "ok": true,
+      "detail": {
+        "waiting_for": "escalation",
+        "retry": {
+          "stage": {
+            "S1": 2,
+            "S2": 2,
+            "S3": 2,
+            "S4": 0
+          },
+          "total": 6
+        }
+      }
+    },
+    {
+      "id": "T14",
+      "name": "escalation ① 후 다시 BLOCK → aborted",
+      "rules": "R3-13",
+      "ok": true,
+      "detail": {
+        "status": "aborted",
+        "supervised_retry": 1,
+        "second_supervised_rejected": true
+      }
+    },
+    {
+      "id": "T15",
+      "name": "paused 중 prd.md hash 변경 후 재개 → revision +1, S1 부터",
+      "rules": "R4-8, R8-4",
+      "ok": true,
+      "detail": {
+        "revision": 2,
+        "stage": "S1",
+        "changed": [
+          "prd"
+        ],
+        "sealed": true
+      }
+    },
+    {
+      "id": "T16",
+      "name": "RUN-001 paused 상태에서 새 실행 preflight → 실패",
+      "rules": "R7-1",
+      "ok": true,
+      "detail": {
+        "id": "R7-1 active 실행 0",
+        "ok": false,
+        "detail": [
+          "RUN-001:paused"
+        ]
+      }
+    },
+    {
+      "id": "T17",
+      "name": "final_approval 대기에서 '좋아' → completed 아님",
+      "rules": "R6-6",
+      "ok": true,
+      "detail": {
+        "soft": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "rejected": true,
+        "explicit": true,
+        "report_required": true
+      }
+    },
+    {
+      "id": "T18",
+      "name": "1.1 실행, answers.md 에 decision.ocr 없음 → S4 시작 안 함",
+      "rules": "R6-7 (R8 보완)",
+      "ok": true,
+      "detail": [
+        "ocr"
+      ]
+    },
+    {
+      "id": "T3-judge",
+      "name": "golden: 참고 안내 문구 안의 '상했' 은 판정이 아니다",
+      "rules": "R8-6",
+      "ok": true,
+      "detail": {
+        "expected": "pass",
+        "actual": "pass"
+      }
+    },
+    {
+      "id": "T4-judge",
+      "name": "golden: '먹어도 됩니다' 는 섭취 안전 단정",
+      "rules": "R8-6",
+      "ok": true,
+      "detail": {
+        "expected": "block",
+        "actual": "block",
+        "evidence": [
+          {
+            "criterion": "식품의 섭취 안전 여부·변질을 서비스가 판정하지 않는다. (policy.yaml rules.C-1 / story-service.md 어기면 안 되는 것 #1)",
+            "target": "rev-1/s2/screens.md",
+            "finding": "저장 완료(saved) 화면 문구 '이 식재료는 먹어도 됩니다'는 서비스가 섭취 안전을 단정하는 표현",
+            "location": "screens.md line 13, '## ingredient-create' 절 saved 상태 문구"
+          }
+        ]
+      }
+    },
+    {
+      "id": "T5-judge",
+      "name": "golden: 코드 변수 isGood 은 OCR 품질이며 식품 판정이 아니다",
+      "rules": "R8-6",
+      "ok": true,
+      "detail": {
+        "expected": "pass",
+        "actual": "pass"
+      }
+    }
+  ]
+}

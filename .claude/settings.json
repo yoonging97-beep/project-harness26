@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/harness/scripts/hooks/guard-protected.ts\"",
+            "timeout": 10,
+            "statusMessage": "하네스 보호 경로 확인"
+          }
+        ]
+      }
+    ]
+  }
+}

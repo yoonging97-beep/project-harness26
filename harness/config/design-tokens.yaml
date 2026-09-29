@@ -1,0 +1,104 @@
+# 디자인 토큰 SSOT (R4). 실행에 쓰는 디자인 값의 유일한 출처.
+# 원본: Docs/default-design.md (설명 문서). 값을 옮길 때 바꾸거나 확정하지 않았다.
+# leaf = { value, status: confirmed|provisional, origin }
+#   origin: design = Docs/design.md, claude-default = Claude 임의값 (🟠)
+
+color:
+  bg:              { value: "#F4F5F7", status: provisional, origin: claude-default }
+  surface:         { value: "#FFFFFF", status: provisional, origin: claude-default }
+  surface-sunken:  { value: "#EEF0F3", status: provisional, origin: claude-default }
+  border:          { value: "#E4E6EA", status: provisional, origin: claude-default }
+  text-primary:    { value: "#111418", status: provisional, origin: claude-default }
+  text-secondary:  { value: "#4B515A", status: provisional, origin: claude-default }
+  text-tertiary:   { value: "#6B717A", status: provisional, origin: claude-default }
+  ink:             { value: "#111418", status: provisional, origin: claude-default }
+  on-ink:          { value: "#FFFFFF", status: provisional, origin: claude-default }
+  primary:         { value: "#2563EB", status: provisional, origin: claude-default }
+  on-primary:      { value: "#FFFFFF", status: provisional, origin: claude-default }
+  content-yellow:  { value: "#FCE7A1", status: provisional, origin: claude-default }
+  content-pink:    { value: "#F9C9CF", status: provisional, origin: claude-default }
+  content-purple:  { value: "#DDD6FE", status: provisional, origin: claude-default }
+  content-green:   { value: "#CDEFD6", status: provisional, origin: claude-default }
+  status-imminent-fg: { value: "#92400E", status: provisional, origin: claude-default }
+  status-imminent-bg: { value: "#FEF3C7", status: provisional, origin: claude-default }
+  status-expired-fg:  { value: "#B91C1C", status: provisional, origin: claude-default }
+  status-expired-bg:  { value: "#FEE2E2", status: provisional, origin: claude-default }
+  status-consumed-fg: { value: "#166534", status: provisional, origin: claude-default }
+  status-consumed-bg: { value: "#DCFCE7", status: provisional, origin: claude-default }
+
+# content 색은 UI 요소(버튼·내비)에 쓰지 않는다 (design.md Neutral UI + Expressive Content)
+color_roles:
+  content_colors: { value: [content-yellow, content-pink, content-purple, content-green], status: confirmed, origin: design }
+  category_mapping:
+    value: { fridge: content-green, freezer: content-pink, nutrition: content-purple, schedule: content-yellow }
+    status: provisional
+    origin: claude-default
+
+contrast:
+  body_min:  { value: 4.5, status: confirmed, origin: design }   # WCAG AA
+  large_min: { value: 3.0, status: confirmed, origin: design }
+
+theme:
+  modes: { value: [light], status: provisional, origin: claude-default }
+
+typography:
+  families:
+    primary:   { value: Pretendard, status: confirmed, origin: design }
+    secondary: { value: Inter, status: confirmed, origin: design }
+  fallback:
+    value: 'Pretendard, Inter, -apple-system, "Apple SD Gothic Neo", sans-serif'
+    status: provisional
+    origin: claude-default
+  weights: { value: [400, 500, 600, 700], status: confirmed, origin: design }
+  scale:
+    display: { value: { size: 36, line_height: 44, weight: 700 }, status: confirmed, origin: design }
+    h1:      { value: { size: 28, line_height: 36, weight: 700 }, status: confirmed, origin: design }
+    h2:      { value: { size: 24, line_height: 32, weight: 600 }, status: confirmed, origin: design }
+    h3:      { value: { size: 20, line_height: 28, weight: 600 }, status: confirmed, origin: design }
+    body-l:  { value: { size: 16, line_height: 26, weight: 400 }, status: confirmed, origin: design }
+    body-m:  { value: { size: 14, line_height: 22, weight: 400 }, status: confirmed, origin: design }
+    label:   { value: { size: 13, line_height: 18, weight: 500 }, status: confirmed, origin: design }
+    caption: { value: { size: 12, line_height: 18, weight: 400 }, status: confirmed, origin: design }
+  min_size:       { value: 12, status: provisional, origin: claude-default }
+  input_min_size: { value: 16, status: provisional, origin: claude-default }
+
+radius:
+  card_range: { value: [16, 28], status: confirmed, origin: design }
+  card-sm:    { value: 16, status: provisional, origin: claude-default }
+  card:       { value: 20, status: provisional, origin: claude-default }
+  card-lg:    { value: 28, status: provisional, origin: claude-default }
+  pill:       { value: 999, status: provisional, origin: claude-default }
+  inner:      { value: 12, status: provisional, origin: claude-default }
+
+shadow:
+  shadow-1: { value: "0 1px 2px rgba(17,20,24,.04), 0 2px 8px rgba(17,20,24,.04)", status: provisional, origin: claude-default }
+  shadow-2: { value: "0 4px 16px rgba(17,20,24,.08)", status: provisional, origin: claude-default }
+
+spacing:
+  scale:         { value: [4, 8, 12, 16, 20, 24, 32, 40, 48], status: provisional, origin: claude-default }
+  gutter:        { value: 20, status: provisional, origin: claude-default }
+  card-padding:  { value: [16, 20], status: provisional, origin: claude-default }
+  card-gap:      { value: 12, status: provisional, origin: claude-default }
+  section-gap:   { value: 32, status: provisional, origin: claude-default }
+
+layout:
+  viewport:     { value: 375, status: provisional, origin: claude-default }
+  viewport_min: { value: 360, status: provisional, origin: claude-default }
+  touch_min:    { value: 44, status: provisional, origin: claude-default }
+
+icon:
+  size:   { value: 24, status: provisional, origin: claude-default }
+  stroke: { value: 1.5, status: provisional, origin: claude-default }
+
+motion:
+  range:
+    button:     { value: [100, 150], status: confirmed, origin: design }
+    card-press: { value: [150, 200], status: confirmed, origin: design }
+    expand:     { value: [200, 300], status: confirmed, origin: design }
+    transition: { value: [250, 350], status: confirmed, origin: design }
+  duration:
+    button:     { value: 120, status: provisional, origin: claude-default }
+    card-press: { value: 180, status: provisional, origin: claude-default }
+    expand:     { value: 250, status: provisional, origin: claude-default }
+    transition: { value: 300, status: provisional, origin: claude-default }
+  easing: { value: "cubic-bezier(0.2, 0, 0, 1)", status: provisional, origin: claude-default }
